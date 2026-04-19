@@ -1,0 +1,38 @@
+{
+  "name": "necraidan",
+  "version": "1.0.0",
+  "description": "The necraidan Card",
+  "type": "module",
+  "main": "./dist/card.mjs",
+  "bin": {
+    "necraidan": "./dist/card.mjs"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "start": "npm run build && node ./dist/card.mjs",
+    "dev": "tsdown --watch",
+    "test": "vitest run"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/necraidan/necraidan-card.git"
+  },
+  "keywords": [
+    "necraidan",
+    "npx",
+    "card",
+    "npx card"
+  ],
+  "author": "Benjamin Auzanneau <b@necraidan.com>",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "string-width": "^8.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "tsdown": "^0.21.9",
+    "typescript": "^5.8.3",
+    "vitest": "^4.1.4"
+  }
+}
