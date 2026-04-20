@@ -2,7 +2,7 @@ import chalk, { type ChalkInstance } from 'chalk';
 
 export type BorderStyle = 'bold' | 'single' | 'double' | 'round';
 
-interface BorderChars {
+export interface BorderChars {
   topLeft: string;
   topRight: string;
   bottomLeft: string;
@@ -24,10 +24,20 @@ export interface BoxOptions {
   padding?: number;
   margin?: number;
   contentWidth: number;
+  cornerLabel?: string;
+}
+
+export function buildBottomBorder(chars: BorderChars, borderColor: ChalkInstance, innerWidth: number, cornerLabel?: string): string {
+  if (!cornerLabel) {
+    return borderColor(chars.bottomLeft + chars.horizontal.repeat(innerWidth) + chars.bottomRight);
+  }
+  const label = ` ${cornerLabel} `;
+  const horizCount = Math.max(0, innerWidth - label.length);
+  return borderColor(chars.bottomLeft + chars.horizontal.repeat(horizCount)) + chalk.dim(label) + borderColor(chars.bottomRight);
 }
 
 export function drawBox(lines: string[], options: BoxOptions): string {
-  const { borderStyle = 'bold', borderColor = chalk.white, padding = 1, margin = 0, contentWidth } = options;
+  const { borderStyle = 'bold', borderColor = chalk.white, padding = 1, margin = 0, contentWidth, cornerLabel } = options;
 
   const chars = BORDER_CHARS[borderStyle];
   const pad = ' '.repeat(padding);
@@ -35,9 +45,8 @@ export function drawBox(lines: string[], options: BoxOptions): string {
   const innerWidth = contentWidth + padding * 2;
 
   const topBorder = borderColor(chars.topLeft + chars.horizontal.repeat(innerWidth) + chars.topRight);
-  const bottomBorder = borderColor(chars.bottomLeft + chars.horizontal.repeat(innerWidth) + chars.bottomRight);
-  const sideRow = (content: string) =>
-    borderColor(chars.vertical) + pad + content + pad + borderColor(chars.vertical);
+  const bottomBorder = buildBottomBorder(chars, borderColor, innerWidth, cornerLabel);
+  const sideRow = (content: string) => borderColor(chars.vertical) + pad + content + pad + borderColor(chars.vertical);
 
   const rows = [
     '',

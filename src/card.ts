@@ -4,6 +4,9 @@ import { nickname } from './ascii/nickname.js';
 import { drawBox } from './box.js';
 import { cardData } from './models.js';
 import { centerRaw, computeContentWidth, padLine, stripAnsi, visualWidth } from './utils.js';
+import pkg from '../package.json' with { type: 'json' };
+
+const { version } = pkg;
 
 const nec = chalk.hex('#00d4ff');
 const dim = chalk.hex('#0099bb');
@@ -84,5 +87,6 @@ process.stdout.write(
     padding: 1,
     margin: 3,
     contentWidth,
+    cornerLabel: `v${version}`,
   }) + '\n',
 );
