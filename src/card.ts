@@ -8,9 +8,32 @@ import pkg from '../package.json' with { type: 'json' };
 
 const { version } = pkg;
 
-const nec = chalk.hex('#00d4ff');
-const dim = chalk.hex('#0099bb');
-const accent = chalk.hex('#ff5fa2');
+const nec = chalk.hex('#00e5ff');
+const dim = chalk.hex('#0093a3');
+const accent = chalk.hex('#ff00c8');
+const gold = chalk.hex('#ffe600');
+const white = chalk.hex('#fdfdfd');
+
+// Chromatic-aberration glitch: map block density to the logo's CMY-split palette.
+// Faint edge cells become the magenta/cyan fringe, solid cores stay white,
+// with a yellow scanline jitter to keep the glitch alive.
+const glitchLine = (line: string, row: number): string => {
+  let out = '';
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === ' ') {
+      out += ' ';
+      continue;
+    }
+    let color = white;
+    if (ch === '░') color = accent;
+    else if (ch === '▒') color = nec;
+    else if (ch === '▓') color = (i + row) % 2 === 0 ? nec : accent;
+    else if ((i * 3 + row * 7) % 23 === 0) color = gold;
+    out += color(ch);
+  }
+  return out;
+};
 
 const nicknameLines = nickname.split('\n');
 const logoLines = logo.split('\n');
@@ -46,19 +69,22 @@ const roleCentered = centerRaw(cardData.role, contentWidth);
 
 const styledName = padLine(nec(nameCentered), nameCentered, contentWidth);
 const styledHandle = padLine(dim(handleCentered), handleCentered, contentWidth);
-const styledRole = padLine(chalk.white(roleCentered), roleCentered, contentWidth);
+const styledRole = padLine(gold(roleCentered), roleCentered, contentWidth);
 
-// Links
-const maxLinkWidth = Math.max(...cardData.links.map(({ label, url }) => visualWidth(`${label}:  ${url}`)));
+// Links — right-align labels so the colon column lines up regardless of label length
+const maxLabelWidth = Math.max(...cardData.links.map(({ label }) => visualWidth(label)));
+const padLabel = (label: string) => ' '.repeat(maxLabelWidth - visualWidth(label)) + label;
+const maxLinkWidth = Math.max(...cardData.links.map(({ label, url }) => visualWidth(`${padLabel(label)}:  ${url}`)));
 const linkBlockPad = ' '.repeat(Math.floor((contentWidth - maxLinkWidth) / 2));
 
 const styledLinks = cardData.links.map(({ label, url }) => {
-  const raw = `${linkBlockPad}${label}:  ${url}`;
-  return padLine(`${linkBlockPad}${chalk.white.bold(label + ':')}  ${chalk.cyan(url)}`, raw, contentWidth);
+  const padded = padLabel(label);
+  const raw = `${linkBlockPad}${padded}:  ${url}`;
+  return padLine(`${linkBlockPad}${chalk.white.bold(padded + ':')}  ${nec(url)}`, raw, contentWidth);
 });
 
 // Logo block
-const styledLogoLines = logoLines.map((l) => padLine(accent(l), stripAnsi(l), contentWidth));
+const styledLogoLines = logoLines.map((l, i) => padLine(glitchLine(l, i), stripAnsi(l), contentWidth));
 
 // Empty line
 const emptyLine = ' '.repeat(contentWidth);
